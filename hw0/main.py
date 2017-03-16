@@ -39,7 +39,7 @@ And it will print the words frequency in the given files or the files in the giv
         else:
             p.error("--order must equal to 'asc' or 'desc")
 
-    if len(args) != 1:
+    if len(args) == 0:
         p.error("Provide at least one file or directory")
 
     for path in args:
@@ -77,12 +77,10 @@ def flatMap(func, seq):
 from collections import OrderedDict
 def main():
     options, paths = parse_args()
-    # files = filesInPath(paths[0], options.recursive)
     files = flatMap(filesInPath(options.recursive), paths)
     parser = Parser(*files)
     res = parser.parseFiles()
     printRes(res, isDesc=options.order)
-
 
 
 if __name__ == '__main__':
