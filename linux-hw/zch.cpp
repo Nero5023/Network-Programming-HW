@@ -102,7 +102,7 @@ vector<string> filesInDir(string dirPath) {
     DIR           *d;
     struct dirent *dir;
     d = opendir(dirPath.c_str());
-    vector<string> files = {};
+    vector<string> files;
     if (d){
         while ((dir = readdir(d)) != NULL){
             //            printf("%s\n", dir->d_name);
