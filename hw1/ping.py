@@ -128,3 +128,10 @@ class Pinger():
                 delay  =  delay * 1000
                 print "Get ping in %0.4fms" % delay
 
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Python ping')
+    parser.add_argument('--target-host', action="store", dest="target_host", required=True)
+    given_args = parser.parse_args()  
+    target_host = given_args.target_host
+    pinger = Pinger(target_host=target_host)
+    pinger.ping()
