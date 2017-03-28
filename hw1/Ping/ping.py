@@ -1,5 +1,15 @@
 #coding=utf-8
 
+# 0                   1                   2                   3
+# 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+# +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+# |     Type      |     Code      |          Checksum             |
+# +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+# |           Identifier          |        Sequence Number        |
+# +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+# |     Data ...
+# +-+-+-+-+-
+
 import os
 import argparse
 import socket
@@ -16,19 +26,20 @@ class Pinger():
         self.target_host = target_host
         self.count = count
         self.timeout = timeout
+        self.target_addr = socket.gethostbyname(self.target_host)
 
     def do_checksum(self, source_string):
         """  Verify the packet integritity """
         sum = 0
-        max_count = (len(source_string) / 2) * 2
+        countTo = (len(source_string) / 2) * 2
         count = 0
-        while count < max_count:  # 分割数据每两比特(16bit)为一组
+        while count < countTo:  # 分割数据每两比特(16bit)为一组
             val = ord(source_string[count + 1]) * 256 + ord(source_string[count])
             sum = sum + val
             sum = sum & 0xffffffff
             count = count + 2
 
-        if max_count < len(source_string):  # 如果数据长度为基数,则将最后一位单独相加
+        if countTo < len(source_string):  # 如果数据长度为基数,则将最后一位单独相加
             sum = sum + ord(source_string[len(source_string) - 1])
             sum = sum & 0xffffffff
 
@@ -43,8 +54,7 @@ class Pinger():
         """
         Send ping to the target host
         """
-        target_addr  =  socket.gethostbyname(self.target_host)
-     
+        self.target_addr  =  socket.gethostbyname(self.target_host)
         my_checksum = 0
      
         # Create a dummy heder with a 0 checksum.
@@ -59,7 +69,7 @@ class Pinger():
             "bbHHh", ICMP_ECHO_REQUEST, 0, socket.htons(my_checksum), ID, 1
         )
         packet = header + data
-        sock.sendto(packet, (target_addr, 1))
+        sock.sendto(packet, (self.target_addr, 1))
     
     def receive_ping(self, sock, ID, timeout):
         """
@@ -114,8 +124,8 @@ class Pinger():
         """
         Run the ping process
         """
+        print "PING to %s(%s)..." % (self.target_host, self.target_addr)
         for i in xrange(self.count):
-            print "Ping to %s..." % self.target_host,
             try:
                 delay  =  self.ping_once()
             except socket.gaierror, e:
@@ -126,12 +136,4 @@ class Pinger():
                 print "Ping failed. (timeout within %ssec.)" % self.timeout
             else:
                 delay  =  delay * 1000
-                print "Get ping in %0.4fms" % delay
-
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Python ping')
-    parser.add_argument('--target-host', action="store", dest="target_host", required=True)
-    given_args = parser.parse_args()  
-    target_host = given_args.target_host
-    pinger = Pinger(target_host=target_host)
-    pinger.ping()
+                print "Get ping from %s: time=%0.4fms" % (self.target_addr, delay)
