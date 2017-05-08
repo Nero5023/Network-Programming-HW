@@ -38,6 +38,7 @@ try:
                     except ValueError:
                         pass
                     x.close()
+                    inSocks.remove(x)
 
         for x in outs:
             tosend = data.get(x)
