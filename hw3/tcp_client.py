@@ -12,5 +12,5 @@ while True:
     s.connect((HOST, PORT))
     s.send(temp)
     data = s.recv(1024)
-    print data
+    print "Got from server: '%s'" % (data,)
     s.close()

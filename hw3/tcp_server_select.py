@@ -1,3 +1,5 @@
+#coding:utf-8
+
 import socket
 import select
 
@@ -14,16 +16,18 @@ outSocks = []
 data = {}
 adrs = {}
 
+print "Start Select Server..."
 try:
     while True:
         ins, outs, excs = select.select(inSocks, outSocks, [])
         for x in ins:
-            if x is sock:
+
+            if x is sock:   # 有新的连接
                 newSocket, addr = sock.accept()
                 print "Got connecting from ", addr
                 inSocks.append(newSocket)
                 adrs[newSocket] = addr
-            else:
+            else:          # 有新的数据到来
                 newdata = x.recv(1024)
                 if newdata:
                     print "%d bytes from %s" % (len(newdata), adrs[x])
@@ -39,8 +43,8 @@ try:
                         pass
                     x.close()
                     inSocks.remove(x)
-
-        for x in outs:
+        # 进行写操作
+        for x in outs:  
             tosend = data.get(x)
             if tosend:
                 nsent = x.send(tosend)
