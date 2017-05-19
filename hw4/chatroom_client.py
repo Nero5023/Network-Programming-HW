@@ -11,6 +11,8 @@ PORT = 8080
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
+userName = ""
+
 def onRecvFromStdin(data, sock):
     if data == "exit":
         sock.close()
@@ -40,14 +42,15 @@ def register(sock):
     reponse = sock.recv(1024)
     reponse = json.loads(reponse)
     if reponse['res'] == 0:
-        print "Username: %s, already exits!"
-        register(sock)
+        print "Username: %s, already exits!" % (name,)
+        return register(sock)
     else:
         print "Register success!"
+        return name
 
 
 sock.connect((HOST, PORT))
-register(sock)
+userName = register(sock)
 
 
 

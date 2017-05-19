@@ -20,6 +20,8 @@ adrs = {}
 
 userInfos = {}
 
+aliveUsers = {}
+
 # return Bool
 def saveRegisterInfo(username, password):
     if userInfos.get(username) is not None:
@@ -29,7 +31,6 @@ def saveRegisterInfo(username, password):
 
 
 def register(sock, registerSocks, recvData):
-    print type(recvData)
     try:
         jdata = json.loads(recvData)
     except ValueError:
@@ -46,6 +47,8 @@ def register(sock, registerSocks, recvData):
             reponse = json.dumps({'res': res})
             if res == True:
                 registerSocks.remove(sock)
+                aliveUsers[sock] = username
+                print "User: %s register successed" % (username, )
         sock.sendall(reponse)
 
 
@@ -67,7 +70,6 @@ try:
                     register(x, registerSocks, newdata)
                     continue
                 if newdata:
-                    print "----"
                     print "%d bytes from %s" % (len(newdata), adrs[x])
                     data[x] = data.get(x, "") + newdata
                     if x not in outSocks:
@@ -83,20 +85,26 @@ try:
                     inSocks.remove(x)
         # 进行写操作
         for x in outs:  
-            tosend = data.get(x)
+            # tosend = data.get(x)
+            # if tosend:
+            #     nsent = x.send(tosend)
+            #     print "%d bytes to %s" % (nsent, adrs[x])
+            #     tosend = tosend[nsent:]
+            # if tosend:
+            #     print "%d bytes remain for %s" % (len(tosend), adrs[x])
+            #     data[x] = tosend
+            # else:
+            #     try:
+            #         del data[x]
+            #     except KeyError:
+            #         pass
+            #     outSocks.remove(x)
+            #     print "No data currently remain for", adrs[x]
             if tosend:
-                nsent = x.send(tosend)
-                print "%d bytes to %s" % (nsent, adrs[x])
-                tosend = tosend[nsent:]
-            if tosend:
-                print "%d bytes remain for %s" % (len(tosend), adrs[x])
-                data[x] = tosend
-            else:
-                try:
-                    del data[x]
-                except KeyError:
-                    pass
-                outSocks.remove(x)
-                print "No data currently remain for", adrs[x]
+                dic = {
+                    "username": aliveUsers.get(x),
+                    "data"    : tosend}
+                dataToSend = json.dumps(dic)
+                x.sendall(dataToSend)
 finally:
     sock.close()
