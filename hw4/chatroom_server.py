@@ -2,7 +2,7 @@
 
 import socket
 import select
-
+import json
 HOST = ''
 PORT = 8080
 
@@ -12,9 +12,42 @@ sock.listen(5)
 
 inSocks  = [sock]
 outSocks = []
+registerSocks = set()
 
 data = {}
 adrs = {}
+
+
+userInfos = {}
+
+# return Bool
+def saveRegisterInfo(username, password):
+    if userInfos.get(username) is not None:
+        return False
+    userInfos[username] = password
+    return True
+
+
+def register(sock, registerSocks, recvData):
+    print type(recvData)
+    try:
+        jdata = json.loads(recvData)
+    except ValueError:
+        reponse = json.dumps({'res':0})
+        sock.sendall(reponse)
+    else:
+        username = jdata.get('username')
+        password = jdata.get('password')
+        reponse = ""
+        if username is None or password is None:
+            reponse = json.dumps({'res':0})
+        else:
+            res = saveRegisterInfo(username, password)
+            reponse = json.dumps({'res': res})
+            if res == True:
+                registerSocks.remove(sock)
+        sock.sendall(reponse)
+
 
 print "Start Select Server..."
 try:
@@ -26,10 +59,15 @@ try:
                 newSocket, addr = sock.accept()
                 print "Got connecting from ", addr
                 inSocks.append(newSocket)
+                registerSocks.add(newSocket)
                 adrs[newSocket] = addr
             else:          # 有新的数据到来
                 newdata = x.recv(1024)
+                if x in registerSocks:
+                    register(x, registerSocks, newdata)
+                    continue
                 if newdata:
+                    print "----"
                     print "%d bytes from %s" % (len(newdata), adrs[x])
                     data[x] = data.get(x, "") + newdata
                     if x not in outSocks:
