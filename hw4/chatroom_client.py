@@ -13,6 +13,17 @@ sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 userName = ""
 
+printColorStrDic = {}
+nextColorNum = 91
+
+def colorName(name):
+    global nextColorNum
+    if printColorStrDic.get(name) is None:
+        printColorStrDic[name] = '\x1b[%sm%s\x1b[0m' % (str(nextColorNum), name)
+        if nextColorNum != 98:
+            nextColorNum+=1
+    return printColorStrDic[name]
+
 def onRecvFromStdin(data, sock):
     if data == "exit":
         sock.close()
@@ -22,7 +33,7 @@ def onRecvFromStdin(data, sock):
 
 def onRecvFromSock(data):
     data = json.loads(data)
-    print data['username'] + ": " + data['data']
+    print colorName(data['username']) + ": " + data['data']
 
 def register(sock):
     name = raw_input("Please enter your name: ")
