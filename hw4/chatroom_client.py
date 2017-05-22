@@ -17,11 +17,12 @@ def onRecvFromStdin(data, sock):
     if data == "exit":
         sock.close()
         sys.exit(0)
-    data = userName + ": " + data
+    # data = userName + ": " + data
     sock.send(data)
 
 def onRecvFromSock(data):
-    print data
+    data = json.loads(data)
+    print data['username'] + ": " + data['data']
 
 def register(sock):
     name = raw_input("Please enter your name: ")

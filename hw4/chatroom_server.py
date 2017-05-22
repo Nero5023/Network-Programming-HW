@@ -29,6 +29,12 @@ def saveRegisterInfo(username, password):
     userInfos[username] = password
     return True
 
+def sendDataToSockExcept(data, exSock, allInSocks):
+    for s in allInSocks:
+        if s is not exSock and s is not sock:
+            s.sendall(data)
+
+
 
 def register(sock, registerSocks, recvData):
     try:
@@ -85,7 +91,7 @@ try:
                     inSocks.remove(x)
         # 进行写操作
         for x in outs:  
-            # tosend = data.get(x)
+            tosend = data.get(x)
             # if tosend:
             #     nsent = x.send(tosend)
             #     print "%d bytes to %s" % (nsent, adrs[x])
@@ -105,6 +111,14 @@ try:
                     "username": aliveUsers.get(x),
                     "data"    : tosend}
                 dataToSend = json.dumps(dic)
-                x.sendall(dataToSend)
+                # x.sendall(dataToSend)
+                sendDataToSockExcept(dataToSend, x, inSocks)
+                data[x] = None
+            else:
+                try:
+                    del data[x]
+                except KeyError:
+                    pass
+                outSocks.remove(x)
 finally:
     sock.close()
