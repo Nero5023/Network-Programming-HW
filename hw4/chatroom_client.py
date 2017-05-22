@@ -36,29 +36,34 @@ def onRecvFromSock(data):
     print colorName(data['username']) + ": " + data['data']
 
 def register(sock):
-    name = raw_input("Please enter your name: ")
-    password = ""
-    while True:
-        password = raw_input("Plase enter your password: ")
-        passwordCheck = raw_input("Plase enter the password again: ")
-        if password == passwordCheck and password != "":
-            break
-        elif password != passwordCheck:
-            print "Password is not same!"
+    try:
+        name = raw_input("Please enter your name: ")
+        password = ""
+        while True:
+            password = raw_input("Plase enter your password: ")
+            passwordCheck = raw_input("Plase enter the password again: ")
+            if password == passwordCheck and password != "":
+                break
+            elif password != passwordCheck:
+                print "Password is not same!"
+            else:
+                print "Password is empty"
+        passwordMd5 = hashlib.md5(password)
+        passwordMd5 = passwordMd5.hexdigest()
+        dataToSend = {"username": name, "password": passwordMd5}
+        sock.sendall(json.dumps(dataToSend))
+        reponse = sock.recv(1024)
+        reponse = json.loads(reponse)
+        if reponse['res'] == 0:
+            print "Username and password do not compare! or This user haved login!" 
+            return register(sock)
         else:
-            print "Password is empty"
-    passwordMd5 = hashlib.md5(password)
-    passwordMd5 = passwordMd5.hexdigest()
-    dataToSend = {"username": name, "password": passwordMd5}
-    sock.sendall(json.dumps(dataToSend))
-    reponse = sock.recv(1024)
-    reponse = json.loads(reponse)
-    if reponse['res'] == 0:
-        print "Username: %s, already exits!" % (name,)
-        return register(sock)
-    else:
-        print "Register success!"
-        return name
+            print "Success!"
+            print "Start chat..."
+    except:
+        sock.close()
+        sys.exit(0)
+    return name
 
 
 sock.connect((HOST, PORT))

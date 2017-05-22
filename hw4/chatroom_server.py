@@ -22,6 +22,8 @@ userInfos = {}
 
 aliveUsers = {}
 
+sockToUserName = {}
+
 # return Bool
 def saveRegisterInfo(username, password):
     if userInfos.get(username) is not None:
@@ -34,7 +36,10 @@ def sendDataToSockExcept(data, exSock, allInSocks):
         if s is not exSock and s is not sock:
             s.sendall(data)
 
-
+def login(username, password):
+    if userInfos[username] == password:
+        return True
+    return False
 
 def register(sock, registerSocks, recvData):
     try:
@@ -49,12 +54,21 @@ def register(sock, registerSocks, recvData):
         if username is None or password is None:
             reponse = json.dumps({'res':0})
         else:
-            res = saveRegisterInfo(username, password)
+            res = False
+            if username in userInfos and username not in aliveUsers:
+                res = login(username, password)
+                if res == True:
+                    aliveUsers[username] = sock
+                    sockToUserName[sock] = username
+                    print "User: %s login successed" % (username, )
+            if username not in userInfos:
+                res = saveRegisterInfo(username, password)
+                if res == True:
+                    registerSocks.remove(sock)
+                    aliveUsers[username] = sock
+                    sockToUserName[sock] = username
+                    print "User: %s register successed" % (username, )
             reponse = json.dumps({'res': res})
-            if res == True:
-                registerSocks.remove(sock)
-                aliveUsers[sock] = username
-                print "User: %s register successed" % (username, )
         sock.sendall(reponse)
 
 
@@ -76,13 +90,15 @@ try:
                     register(x, registerSocks, newdata)
                     continue
                 if newdata:
-                    print "%d bytes from %s" % (len(newdata), adrs[x])
+                    print "%d bytes forrom %s" % (len(newdata), adrs[x])
                     data[x] = data.get(x, "") + newdata
                     if x not in outSocks:
                         outSocks.append(x)
                 else:
                     print "disconnected from", adrs[x]
                     del adrs[x]
+                    del aliveUsers[sockToUserName[x]]
+                    del sockToUserName[x]
                     try:
                         outSocks.remove(x)
                     except ValueError:
