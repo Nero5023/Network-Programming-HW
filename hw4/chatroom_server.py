@@ -124,7 +124,7 @@ try:
             #     print "No data currently remain for", adrs[x]
             if tosend:
                 dic = {
-                    "username": aliveUsers.get(x),
+                    "username": sockToUserName.get(x),
                     "data"    : tosend}
                 dataToSend = json.dumps(dic)
                 # x.sendall(dataToSend)
