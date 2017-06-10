@@ -46,7 +46,7 @@ def getItemsInPage(url):
     pageDownLinkXPATH = "//li[@class='pagedown']/a"
     pageDownNodes = root.xpath(pageDownLinkXPATH)
     if len(pageDownNodes) == 0:
-        return 
+        return
     else:
         pageDownLink = pageDownNodes[0].attrib['href']
         getItemsInPage(pageDownLink)

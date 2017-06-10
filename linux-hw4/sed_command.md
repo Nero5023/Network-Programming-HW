@@ -17,10 +17,10 @@
 	sed -n 's/Tommy.*$/Tommy IS on Vacation/pg' sed_example.txt
 
 # 写一个能完成下列任务的sed脚本。 
-## • a)在第一行前插入标题EMPLOYEES.
-## • b) 删除以200结尾的工资项。
-## • c)把名字和姓的内容颠倒
-## • d)在文件末尾加上FILE END
+* a)在第一行前插入标题EMPLOYEES.
+* b) 删除以200结尾的工资项。
+* c)把名字和姓的内容颠倒
+* d)在文件末尾加上FILE END
 
 若完成每一步需要以下命令
 
