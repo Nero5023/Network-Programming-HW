@@ -48,12 +48,12 @@ class SMZDMSpider:
             print "商品详情链接: ", itemLink
 
             # product name
-            prodNameXPATH = "//span[@class='black']"
+            prodNameXPATH = "div[@class='listItem']/h2/a/span[@class='black']"
             prodName = item.xpath(prodNameXPATH)[0].text
             print "商品名:  ", prodName
 
             # price
-            priceXPATH = "//span[@class='red']"
+            priceXPATH = "div[@class='listItem']/h2/a/span[@class='red']"
             price = item.xpath(priceXPATH)[0].text
             print "商品价格: ", price
 
