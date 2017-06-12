@@ -75,8 +75,6 @@ class SMZDMSpider:
         self.getItemsInPage(firstPageURL)
 
 
-
-
 if __name__=="__main__":
     spider = SMZDMSpider()
     spider.run()

@@ -9,10 +9,10 @@ class ItemsSaver(threading.Thread):
 
     def run(self):
         while True:
-            print self.queue.qsize()
             rows = self.queue.get(1)
             self.f_csv.writerows(rows)
 
+# 获取文件 handler, 当文件存在时, 以增加模式打开文件,如果不存在,则后创建文件,并写入 header
 def getFileHandler():
     if not os.path.isfile("data.csv"): # not exist
         headers = ["ProductName", "ItemLink", "Price", "Description",
