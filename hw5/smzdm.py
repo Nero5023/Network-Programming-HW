@@ -2,22 +2,8 @@
 
 import urllib2
 from lxml import etree
-import csv
-import os.path
-
-
-def getFileHandler():
-    if not os.path.isfile("data.csv"): # not exist
-        headers = ["ProductName", "ItemLink", "Price", "Description",
-                    "ProductLink"]
-        file = open("data.csv",'w')
-        f = csv.writer(file)
-        f.writerow(headers)
-        return f
-    else:
-        file = open("data.csv",'a')
-        f = csv.writer(file)
-        return f
+from Queue import Queue
+from ItemsSaver import ItemsSaver
 
 
 class SMZDMSpider:
@@ -25,7 +11,8 @@ class SMZDMSpider:
         import sys
         reload(sys)
         sys.setdefaultencoding('utf-8')
-        self.f_csv = getFileHandler()
+        self.item_queue = Queue(32)
+        self.item_saver_thread = ItemsSaver(self.item_queue)
 
 
     # 递归算法
@@ -40,6 +27,7 @@ class SMZDMSpider:
         root = etree.HTML(page)
         itemsListXPATH = "//li[@class='list']"
         allItems = root.xpath(itemsListXPATH)
+        itemDatas = []
         for item in allItems:
             # Link Path
             itemLinkXPATH = "a[@href]"
@@ -67,7 +55,9 @@ class SMZDMSpider:
             productLink = item.xpath(productLinkXPATH)[0].attrib['href']
             print "商品链接: ", productLink
             print "--------"
-            self.saveToCSVFile(prodName, itemLink, price, descrip, productLink)
+            itemDatas.append((prodName, itemLink, price, descrip, productLink))
+        # put the items to the queue
+        self.item_queue.put(itemDatas, 1)
         print "****************"
         pageDownLinkXPATH = "//li[@class='pagedown']/a"
         pageDownNodes = root.xpath(pageDownLinkXPATH)
@@ -81,11 +71,9 @@ class SMZDMSpider:
 
     def run(self):
         firstPageURL = "http://www.smzdm.com/tag/%E4%BA%AC%E4%B8%9C618/faxian/"
+        self.item_saver_thread.start()
         self.getItemsInPage(firstPageURL)
 
-    def saveToCSVFile(self, prodName, itemLink, price, descrip, productLink):
-        row = (prodName, itemLink, price, descrip, productLink)
-        self.f_csv.writerow(row)
 
 
 
