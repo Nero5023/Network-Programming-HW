@@ -47,4 +47,11 @@ class SMZDMSpider:
 
 if __name__=="__main__":
     spider = SMZDMSpider()
-    spider.run()
+    try:
+        spider.run()
+    except:
+        spider.item_parse_thread.stop()
+        spider.item_saver_thread.stop()
+    else:
+        spider.item_parse_thread.stop()
+        spider.item_saver_thread.stop()
