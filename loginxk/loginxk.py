@@ -100,6 +100,27 @@ def loginXK():
 
     print examTimeText
 
+def loginSession():
+    header = {
+        "Host": "xk.suda.edu.cn",
+        "Connection": "keep - alive",
+        "Upgrade-Insecure-Requests": "1",
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+        "Accept-Language": "zh-CN,zh;q=0.8,en;q=0.6,zh-TW;q=0.4"
+    }
+    loginURL = "http://xk.suda.edu.cn/default_szdx.aspx"
+
+    checkCodeImgURL = "http://xk.suda.edu.cn/CheckCode.aspx"
+    rs = requests.session()
+    loginPageHTML = rs.get(url=loginURL, headers=header).content
+
+    vsDicRe = r'<input type="hidden" name="(.*?)" value="(.*?)"'
+    vsDic = dict(re.findall(vsDicRe, loginPageHTML))
+    viewState = vsDic["__VIEWSTATE"]
+
+    checkCodeImg = rs.get(checkCodeImgURL).content
+    return rs, viewState, checkCodeImg
 
 
 loginXK()
